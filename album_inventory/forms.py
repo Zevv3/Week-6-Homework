@@ -14,6 +14,6 @@ class UserSignupForm(FlaskForm):
     submit_button = SubmitField()
 
 class UserSigninForm(FlaskForm):
-    login = StringField('Email or Display Name', validators=[DataRequired()])
+    login = StringField('Login', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit_button = SubmitField()

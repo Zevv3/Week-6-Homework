@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 import uuid
 from werkzeug.security import generate_password_hash
 import secrets
@@ -6,9 +7,10 @@ from datetime import datetime
 from flask_login import UserMixin, LoginManager
 
 db = SQLAlchemy()
-LoginManager = LoginManager()
+login_manager = LoginManager()
+ma = Marshmallow()
 
-@LoginManager.user_loader
+@login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
 
@@ -23,7 +25,7 @@ class User(db.Model, UserMixin):
     token = db.Column(db.String, default = '', unique = True)
     date_created = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
 
-    def __init__(self, email, display_name = '', first_name = '', last_name = '', id = '', password = '', token = '', g_auth_verify = False, login = ''):
+    def __init__(self, email, display_name = '', first_name = '', last_name = '', id = '', password = '', token = '', g_auth_verify = False):
         self.id = self.set_id()
         self.first_name = first_name
         self.last_name = last_name
@@ -32,7 +34,7 @@ class User(db.Model, UserMixin):
         self.email = email
         self.token = self.set_token(24)
         self.g_auth_verify = g_auth_verify
-        self.login = [self.email, self.display_name]
+        # self.login = self.email, self.display_name
 
 
     def set_token(self, length):
@@ -46,4 +48,37 @@ class User(db.Model, UserMixin):
         return self.pw_hash
     
     def __repr__(self):
-        return f"User {self.email} has been added to the database!"
+        return f"User {self.display_name} has been added to the database!"
+
+class Album(db.Model):
+    id = db.Column(db.String, primary_key = True)
+    album_title = db.Column(db.String(150), nullable = False)
+    artist_name = db.Column(db.String(100), nullable = False)
+    year = db.Column(db.Integer, nullable = True)
+    genre = db.Column(db.String(200), nullable = False)
+    number_of_tracks = db.Column(db.Integer, nullable = True)
+    label = db.Column(db.String(100), nullable = True)
+    user_token = db.Column(db.String, db.ForeignKey('user.token'), nullable = False)
+
+    def __init__(self, album_title, artist_name, year, genre, number_of_tracks, label, user_token, id = ''):
+        self.id = self.set_id()
+        self.album_title = album_title
+        self.artist_name = artist_name
+        self.year = year
+        self.genre = genre
+        self.number_of_tracks = number_of_tracks
+        self.label = label
+        self.user_token = user_token
+    
+    def __repr__(self):
+        return f"{self.album_title} has been added to your library!"
+
+    def set_id(self):
+        return secrets.token_urlsafe()
+
+class AlbumSchema(ma.Schema):
+    class Meta:
+        fields = ['id', 'album_title', 'artist_name', 'year', 'genre', 'number_of_tracks', 'label']
+
+album_schema = AlbumSchema()
+albums_schema = AlbumSchema(many = True)

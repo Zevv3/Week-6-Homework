@@ -26,13 +26,17 @@
                     <!-- This will take us to the home page using that home function we created -->
                     <li>Home</li>
                 </a>
+                {% if current_user.is_authenticated %}
                 <a href="{{ url_for('site.my_library') }}">
                     <li>My Library</li>
-                </a>
                 </a>
                 <a href="{{ url_for('site.my_profile') }}">
                     <li>My Profile</li>
                 </a>
+                <a href="{{ url_for('auth.logout') }}">
+                    <li>Logout</li>
+                </a>
+                {% else %}
                 <a href="{{ url_for('auth.signin') }}">  
                     <!-- This will take us to the home page using that home function we created -->
                     <li>Sign In</li>
@@ -40,6 +44,7 @@
                 <a href="{{ url_for('auth.signup') }}">
                     <li>Sign Up</li>
                 </a>
+                {% endif %}
 
                 <!-- TODO: add navigation for sign up and sign in -->
             </ul>
